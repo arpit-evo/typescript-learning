@@ -95,3 +95,61 @@ function calculateTax(income: number): number {
   "noUnusedParameters": true, /_ Raise an error when a function parameter isn't read.
   "noImplicitReturns": true, /_ Enable error reporting for codepaths that do not explicitly return in a function.
   ```
+
+**Type Aliases:**
+
+- we can define type using `type` keyword and heres the code example:
+
+```
+type Employee = {
+  id: number;
+  name: string;
+  retire: (date: Date) => void;
+};
+```
+
+**Union Type:**
+
+- define using in annotation with `|` symbol.
+
+```
+const kgToLbs = (weight:number | string): number=> {
+  //narrowing type
+  if (typeof weight === "number") {
+    return weight * 2
+  }else {
+    return +weight * 3
+  }
+}
+```
+
+**Intersection Type:**
+
+- define using in annotation with `&` symbol here's example
+
+```
+type Draggable = {
+  drag: ()=> void
+}
+
+type Resizable = {
+  resize: ()=> void
+}
+
+type UIWidget = Draggable & Resizable
+
+let textBox: UIWidget = {
+  drag: () => {},
+  resize: () => {},
+};
+```
+
+**Literal Type:**
+
+- combination of type alises and union and here's example
+
+```
+type Quantity = 50 | 100 ;
+
+type Measurement = "cm" | "inch"
+```
