@@ -146,10 +146,66 @@ let textBox: UIWidget = {
 
 **Literal Type:**
 
-- combination of type alises and union and here's example
+- combination of type aliases and union and here's example
 
 ```
 type Quantity = 50 | 100 ;
 
 type Measurement = "cm" | "inch"
+```
+
+**Nullable types:**
+
+example:
+
+```
+let name: string | null = null;
+```
+
+**Optional chaining (?.):**
+
+- we can use this operator when some array or obj give null value or undefine and here the example:
+
+```
+customer?.birthdate?.getFullYear();
+customers?.[0];
+log?.('message');
+```
+
+**Type Assertions:**
+
+- we can do type assersion using two keywords `as` or `<name of type>`. here is example:
+
+```
+let phone = document.getElementById("phone") as HTMLInputElement; // this is one way
+let phone2 = <HTMLInputElement>document.getElementById("phone"); // this is second way
+```
+
+**Type unknown:**
+
+example:
+
+```
+function render(document:unknown) {
+  //narrowing
+   if (typeof document === "string") {
+    document.toLowerCase()
+   }
+   document.fly() // give error because it's type is unknown
+}
+```
+
+**Type Never:**
+
+example:
+
+```
+function processEvents(): never {
+ // This function never returns because
+ // it has an infinite loop.
+ while (true) {}
+}
+processEvents()
+console.log("hello"); // this is unreachable for this detection we have to enable this in tsconfig
+// "allowUnreachableCode": false /* Disable error reporting for unreachable code. */,
 ```
