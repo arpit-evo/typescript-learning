@@ -861,3 +861,53 @@ console.log(watchedParameter);
 // this shows method name and watching parameter index here it is speed params
 //[ { methodName: 'move', parameterIndex: 0 } ]
 ```
+
+## Ts with Js
+
+- we can use js with ts using this two config in tsconfig file.
+
+```typescript
+ "allowJs": true /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */,
+ "checkJs": true /* Enable error reporting in type-checked JavaScript files. */,
+```
+
+### Including js code into ts
+
+example:
+
+```typescript
+// .ts file
+import tax from "./tax";
+
+let am = tax(20);
+console.log(am);
+
+//.js file
+/**
+ * @param {number} amount  // this type of comment called as jsdoc declaration
+ * @returns {number}
+ */
+export default function tax(amount) {
+  return amount * 3;
+}
+```
+
+#### Using declaration file type checking
+
+- Declaration file name should be like this `filename.d.ts`.
+
+example:
+
+```typescript
+// declare every feature that function does or other function also.
+export declare function tax(amount: number): number;
+```
+
+- for all third party packages might not have type declaration file so here the repo name [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) that hold most type declaration file for packages.
+- we can download package using `@types/packagename`.
+
+example:
+
+```bash
+npm i -D @types/lodash
+```
