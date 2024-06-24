@@ -401,7 +401,7 @@ class Student extends Person {
   }
 }
 
-const student = new Student("id1", "mosh", "ahuja");
+const student = new Student("id1", "mosh", "wick");
 student.walk();
 console.log(student);
 ```
@@ -505,4 +505,359 @@ class GoogleCalender implements Calender {
     throw new Error("Method not implemented.");
   }
 }
+```
+
+## Generics
+
+- generics is like we can give custom type for same class but for diff objects of that class using this notation `<>`.
+
+### Generic Classes
+
+example:
+
+```typescript
+class KeyValuePair<K, V> {
+  constructor(public key: K, public value: V) {}
+}
+
+let pair = new KeyValuePair<string, number>("sum", 2);
+```
+
+### Generic Function
+
+example:
+
+```typescript
+class ArrayUtils {
+  static wrapInArray<T>(value: T) {
+    return [value];
+  }
+}
+
+const list = ArrayUtils.wrapInArray("1");
+
+// extending generic classes
+
+interface Product {
+  name: string;
+  price: number;
+}
+
+class Store<T> {
+  protected _objects: T[] = [];
+
+  add(obj: T): void {
+    this._objects.push(obj);
+  }
+}
+
+// pass on the generic type parameter
+class CompressibleStore<T> extends Store<T> {
+  compress() {}
+}
+
+// Restrict the generic type parameter
+class SearchableStore<T extends { name: string }> extends Store<T> {
+  find(name: string): T | undefined {
+    return this._objects.find((obj) => obj.name === name);
+  }
+}
+
+// fix the generic type parameter
+class ProductStore extends Store<Product> {}
+```
+
+#### Keyof operator
+
+example:
+
+```typescript
+class Store<T> {
+  protected _objects: T[] = [];
+
+  add(obj: T): void {
+    this._objects.push(obj);
+  }
+
+  // T is product
+  // keyof T => "name" | "price"
+  find(property: keyof T, value: unknown): T | undefined {
+    return this._objects.find((obj) => obj[property] === value);
+  }
+}
+
+let store = new Store<Product>();
+store.add({ name: "jon", price: 1 });
+store.find("name", "something");
+store.find("price", 1);
+store.find("some that not in object key", 1); // this will give error
+```
+
+### Generic Interface
+
+example:
+
+```typescript
+interface Result<T> {
+  data: T | null;
+  error: string | null;
+}
+
+function fetch<T>(url: string): Result<T> {
+  return { data: null, error: null };
+}
+
+interface User {
+  username: string;
+}
+
+interface Product {
+  title: string;
+}
+//when generic type user then data represent as User data
+// and generic type product then data represent as Product data
+const response = fetch<Product>("url");
+// response.data?.title
+```
+
+### Generic Constraint
+
+example:
+
+```typescript
+//  we can limit type of parameter in generic constraint
+class Person1 {
+  constructor(public name: string) {}
+}
+
+class Customer extends Person1 {}
+
+function echo<T extends Person1>(value: T): T {
+  return value;
+}
+// both valid because every parent instance and child of that  parent instance valid
+echo(new Person1("some"));
+echo(new Customer("something"));
+```
+
+### Type Mapping
+
+- we can have generic type mapping using `keyof` operator and `index-signature`.
+
+example:
+
+```typescript
+interface Product1 {
+  name: string;
+  price: number;
+}
+
+// type mapping is doing by keyof operator and index signature
+
+type ReadOnly<T> = {
+  // Keyof operator
+  // index signature
+  readonly [Property in keyof T]: T[Property];
+};
+
+let product: ReadOnly<Product1> = {
+  name: "a",
+  price: 1,
+};
+
+// product.name= "a" // error : Cannot assign to 'name' because it is a read-only property
+```
+
+## Decorators
+
+- decorators is used by classes and it's attributes to change the behavior of it.
+- in simple words it is function.
+- we can use decorators using `@name-of-decorator`.
+- and for use of decorator we have to enable one config in tsconfig file.
+
+```json
+"experimentalDecorators": true /* Enable experimental support for legacy experimental decorators. */
+```
+
+### 1. Class Decorators
+
+example:
+
+```typescript
+// parameter of function varies for diff decorators based on it use
+function Component(constructor: Function) {
+  console.log("decorator is executed");
+  constructor.prototype.uniqueId = Date.now();
+  constructor.prototype.insertIntoDOM = () => {
+    console.log("inserting the component in the DOM.");
+  };
+}
+
+@Component
+class ProfileComponent {}
+```
+
+### 2. Parameterized Decorator
+
+example:
+
+```typescript
+type ComponentOption = {
+  selector: string;
+};
+
+function Component1(options: ComponentOption) {
+  return (constructor: Function) => {
+    console.log("decorator is executed");
+    constructor.prototype.options = options;
+    constructor.prototype.uniqueId = Date.now();
+    constructor.prototype.insertIntoDOM = () => {
+      console.log("inserting the component in the DOM.");
+    };
+  };
+}
+
+@Component1({ selector: "#my-profile" })
+class ProfileComponent1 {}
+```
+
+### 3. Multiple Decorators
+
+example:
+
+```typescript
+function Pipe(constructor: Function) {
+  console.log("Pipe decorators executed");
+  constructor.prototype.pipe = true;
+}
+
+// here's order matter for calling decorators
+// in this order first component1 is execute then Pipe will execute.
+@Pipe
+@Component1({ selector: "#my-profile" })
+class ProfileComponent1 {}
+```
+
+### 4. Method Decorator
+
+example:
+
+```typescript
+// initial takes this three parameter
+function Log(target: any, methodName: string, descriptor: PropertyDescriptor) {
+  const original = descriptor.value as Function; // take ref of original value
+  descriptor.value = function (...args: any) {
+    // overwrite existing say function
+    console.log("before");
+    original.call(this, ...args);
+    console.log("After");
+  };
+}
+
+class Person3 {
+  @Log
+  say(message: String) {
+    console.log("Person says " + message);
+  }
+}
+
+const p1 = new Person3();
+p1.say("blue");
+```
+
+### 5. Accessor decorators
+
+example:
+
+```typescript
+// same as method decorator but accessing type is diff
+function Capitalize(
+  target: any,
+  methodName: string,
+  descriptor: PropertyDescriptor
+) {
+  const original = descriptor.get;
+  descriptor.get = function () {
+    const result = original?.call(this);
+    return typeof result === "string" ? result.toUpperCase() : result;
+  };
+}
+
+class Person4 {
+  constructor(public firstname: string, public lastname: string) {}
+
+  @Capitalize
+  get fullname() {
+    return `${this.firstname} ${this.lastname}`;
+  }
+}
+let p6 = new Person4("mosh", "jon");
+console.log(p6.fullname);
+```
+
+### 6. Property decorator
+
+erxample:
+
+```typescript
+function MinLength(length: number) {
+  return function (target: any, propertyName: string) {
+    let value: string;
+    let descriptor: PropertyDescriptor = {
+      // returning value
+      get() {
+        return value;
+      },
+      // validating string
+      set(newValue: string) {
+        if (newValue.length < length) {
+          throw new Error(
+            `${propertyName} length should be length of ${length}`
+          );
+        }
+        value = newValue;
+      },
+    };
+    Object.defineProperty(target, propertyName, descriptor); // set property name and value
+  };
+}
+
+class User {
+  @MinLength(4)
+  password: string;
+
+  constructor(password: string) {
+    this.password = password;
+  }
+}
+
+const u1 = new User("123");
+console.log(u1.password);
+```
+
+### 7. Parameter decorator
+
+example:
+
+```typescript
+type WatchParameter = {
+  methodName: string;
+  parameterIndex: number;
+};
+
+const watchedParameter: WatchParameter[] = [];
+
+function Watch(target: any, methodName: string, parameterIndex: number) {
+  watchedParameter.push({
+    methodName,
+    parameterIndex,
+  });
+}
+
+class Vehicle {
+  move(@Watch speed: number) {}
+}
+console.log(watchedParameter);
+// this shows method name and watching parameter index here it is speed params
+//[ { methodName: 'move', parameterIndex: 0 } ]
 ```
